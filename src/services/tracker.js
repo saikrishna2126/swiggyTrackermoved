@@ -1,17 +1,18 @@
 // Use a CORS proxy to fetch the page content
-const PROXY_URL = 'https://api.allorigins.win/get?url=';
+// const PROXY_URL = 'https://api.allorigins.win/get?url=';
+const PROXY_URL = 'https://corsproxy.io/?';
 
 export const fetchProductDetails = async (swiggyUrl, itemNameKey = null) => {
     try {
         const encodedUrl = encodeURIComponent(swiggyUrl);
+        // corsproxy.io returns the raw HTML directly, not wrapped in JSON
         const response = await fetch(`${PROXY_URL}${encodedUrl}`);
-        const data = await response.json();
 
-        if (!data.contents) {
-            throw new Error("Failed to fetch page content");
+        if (!response.ok) {
+            throw new Error(`Proxy error: ${response.status}`);
         }
 
-        const html = data.contents;
+        const html = await response.text();
 
         // Extract __INITIAL_STATE__
         // Regex is too fragile for nested JSON. Use a manual extractor.
